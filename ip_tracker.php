@@ -20,7 +20,7 @@ if(isset($_SESSION["tracking"])){
         $sql = "INSERT INTO visitor_tracking 
             (ip_address, page_name, query_string, visitor_id)
             VALUES ('$ip_address', '$page_name', '$query_string', '$visitor_id')";
-        if(!mysql_query($sql)){
+        if(!$link->query($sql)){
             echo "Failed to update visitor log";   
         }
         $_SESSION["current_page"] = $current_page;        
@@ -32,15 +32,15 @@ if(isset($_SESSION["tracking"])){
     $sql = "INSERT INTO visitor_tracking 
         (ip_address, page_name, query_string)
         VALUES ('$ip_address', '$page_name', '$query_string')";
-    if(!mysql_query($sql)){
+    if(!$link->query($sql)){
         echo "Failed to add new visitor into tracking log";
 		$_SESSION["tracking"] = false;   
     } else {
         //find the next available visitor_id for the database
         //to assign to this person
         $_SESSION["tracking"] = true;
-        $entry_id = mysql_insert_id();
-        $lowest_sql = mysql_query("SELECT MAX(visitor_id) as next FROM visitor_tracking");
+        $entry_id = mysqli_insert_id();
+        $lowest_sql = $link->query("SELECT MAX(visitor_id) as next FROM visitor_tracking");
         $lowest_row = mysql_fetch_array($lowest_sql);
         $lowest = $lowest_row["next"];
         if(!isset($lowest))
@@ -49,7 +49,7 @@ if(isset($_SESSION["tracking"])){
             $lowest++;
         //update the visitor entry with the new visitor id
         //Note, that we do it in this way to prevent a "race condition"
-        mysql_query("UPDATE visitor_tracking SET visitor_id = '$lowest' WHERE entry_id = '$entry_id'");
+        $link->query("UPDATE visitor_tracking SET visitor_id = '$lowest' WHERE entry_id = '$entry_id'");
         //place the current visitor_id into the session so we can use it on
         //subsequent visits to track this person
         $_SESSION["visitor_id"] = $lowest;

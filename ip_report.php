@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 include("db_connect.php");
 //retrieve the appropriate visitor data
 $view = $_GET["view"];
@@ -11,7 +13,7 @@ if($view == "all")
     $sql = "SELECT visitor_id, GROUP_CONCAT(DISTINCT ip_address) as ip_address_list,
         COUNT(DISTINCT ip_address) as ip_total, COUNT(visitor_id) as page_count,
         MIN(timestamp) as start_time, MAX(timestamp) as end_time FROM visitor_tracking GROUP BY visitor_id";
-    $result = mysql_query($sql);
+    $result = $link->query($sql);
     if($result==false){
         $view = "error";
         $error = "Could not retrieve values";   
@@ -27,7 +29,7 @@ if($view == "all")
     } else {
         $sql = "SELECT timestamp, page_name, query_string, ip_address FROM
           visitor_tracking WHERE visitor_id = '$visitor_id'";
-        $result = mysql_query($sql);
+        $result = $link->query($sql);
     }    
 }
 function display_date($time){
@@ -58,7 +60,7 @@ table tr td{
 <h1>IP Tracker Report</h1>
 <?php if($view=="all") {
     //display all of the results grouped by visitor
-    if($row = mysql_fetch_array($result)){
+    if($row = mysqli_fetch_array($result)){
     ?>
     <table>
       <tbody>
@@ -97,7 +99,7 @@ table tr td{
         echo "<td>{$row["page_count"]}</td>";
         echo "<td><a href='ip_report.php?view=record&id={$row["visitor_id"]}'>view</a></td>";
         echo "</tr>";
-      } while ($row = mysql_fetch_array($result));
+      } while ($row = mysqli_fetch_array($result));
     ?>
       </tbody>
     </table>
